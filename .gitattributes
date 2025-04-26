@@ -1,0 +1,2 @@
+Carbon_GAP_20/**/*.sparseX.* filter=lfs diff=lfs merge=lfs -text
+Carbon_GAP_20/Carbon_Data_Set_Total.xyz filter=lfs diff=lfs merge=lfs -text
