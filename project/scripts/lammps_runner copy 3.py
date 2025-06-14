@@ -1,5 +1,5 @@
+# scripts/lammps_runner.py
 import os
-import sys  # ...added import...
 import pandas as pd
 from ase import Atoms
 from ase.io import read, write
@@ -28,7 +28,7 @@ def run_binding_energy(xyz_file, out_dir, lammps_executable='lammps'):
     # Select GAP-20 force field
     params = {
         'pair_style': 'quip',
-        'pair_coeff': [f'* * {GAP_XML} "IP GAP" 1'],
+        'pair_coeff': [f'* * {GAP_XML} "Potential" C'],
         'mass': ['1 12.011']
     }
     from ase.calculators.lammpsrun import LAMMPS
@@ -44,20 +44,18 @@ def run_binding_energy(xyz_file, out_dir, lammps_executable='lammps'):
             or "ML-QUIP package" in msg
             or "Unrecognized pair style 'quip'" in msg
             or "LAMMPS exited" in msg
-            or "IPModel_GAP_Initialise_str: must be compiled with HAVE_GAP" in msg
         ):
-            print("ERROR: Your LAMMPS binary does not have the ML-QUIP package enabled, or was not compiled with HAVE_GAP, which is required for 'pair_style quip'.")
-            print("Please install or compile a LAMMPS binary with the ML-QUIP package and HAVE_GAP enabled (see https://github.com/libAtoms/lammps-quip).")
-            print("Suggestion: Run 'lmp -h' to verify ML-QUIP support in your LAMMPS binary.")
+            print("ERROR: Your LAMMPS binary does not have the ML-QUIP package enabled, which is required for 'pair_style quip'.")
+            print("Please install or compile a LAMMPS binary with the ML-QUIP package enabled (see https://github.com/libAtoms/lammps-quip).")
             print("Original error message:\n", msg)
-            sys.exit(1)  # ...changed from raise...
+            raise
         elif "Failed to retrieve any thermo_style-output" in msg:
             print("ERROR: LAMMPS did not produce any thermo_style output. This usually means LAMMPS failed to run properly, likely due to a missing or misconfigured package (such as ML-QUIP).")
             print("Check your LAMMPS build and input files.")
             print("Original error message:\n", msg)
-            sys.exit(1)
+            raise
         else:
-            sys.exit(1)
+            raise
 
     # Write log
     log_file = os.path.join(out_dir, base + '.log')
@@ -100,7 +98,7 @@ if __name__ == '__main__':
     parser.add_argument('--dir', type=str, default='project/data/clusters', help='Directory of XYZ cluster files')
     parser.add_argument('--out', type=str, default='project/out', help='Output directory for data and logs')
     parser.add_argument('--results', type=str, default='/Users/kannansekarannuradha/Documents/Projects/KURFcarla/project/results/Carbon_GAP_20.xml', help='CSV path to save aggregated results')
-    parser.add_argument('--lammps', type=str, default='/Users/kannansekarannuradha/Documents/Projects/KURFcarla/lammps/src/lmp_mpi', help='Path to the LAMMPS executable compiled with ML-QUIP and HAVE_GAP enabled')
+    parser.add_argument('--lammps', type=str, default='/Users/kannansekarannuradha/Documents/Projects/KURFcarla/lammps/src/lmp_mpi', help='Path to the LAMMPS executable or directory containing it')
     # parser.add_argument('--lammps', type=str, default='/Users/kannansekarannuradha/opt/anaconda3/envs/lammps-ase/bin/lmp', help='Path to the LAMMPS executable or directory containing it')
 #/usr/local/Cellar/lammps/20240829-update2/bin/lmp_mpi
 #/usr/local/Cellar/lammps/20240829-update2/bin/lmp_serial
@@ -131,15 +129,12 @@ if __name__ == '__main__':
                 or "ML-QUIP package" in msg
                 or "Unrecognized pair style 'quip'" in msg
                 or "LAMMPS exited" in msg
-                or "IPModel_GAP_Initialise_str: must be compiled with HAVE_GAP" in msg
             ):
-                print("ERROR: Your LAMMPS binary does not have the ML-QUIP package enabled, or was not compiled with HAVE_GAP, which is required for 'pair_style quip'.")
-                print("Please install or compile a LAMMPS binary with the ML-QUIP package and HAVE_GAP enabled (see https://github.com/libAtoms/lammps-quip).")
-                print("Suggestion: Run 'lmp -h' to verify ML-QUIP support in your LAMMPS binary.")
+                print("ERROR: Your LAMMPS binary does not have the ML-QUIP package enabled, which is required for 'pair_style quip'.")
+                print("Please install or compile a LAMMPS binary with the ML-QUIP package enabled (see https://github.com/libAtoms/lammps-quip).")
                 print("Original error message:\n", msg)
-                sys.exit(1)  # ...changed from raise...
             else:
-                sys.exit(1)  # ...changed from raise...
+                raise
     else:
         try:
             df = batch_run(args.dir, args.out, args.results, lmp_executable)
@@ -151,13 +146,9 @@ if __name__ == '__main__':
                 or "ML-QUIP package" in msg
                 or "Unrecognized pair style 'quip'" in msg
                 or "LAMMPS exited" in msg
-                or "IPModel_GAP_Initialise_str: must be compiled with HAVE_GAP" in msg
             ):
-                print("ERROR: Your LAMMPS binary does not have the ML-QUIP package enabled, or was not compiled with HAVE_GAP, which is required for 'pair_style quip'.")
-                print("Please install or compile a LAMMPS binary with the ML-QUIP package and HAVE_GAP enabled (see https://github.com/libAtoms/lammps-quip).")
-                print("Suggestion: Run 'lmp -h' to verify ML-QUIP support in your LAMMPS binary.")
+                print("ERROR: Your LAMMPS binary does not have the ML-QUIP package enabled, which is required for 'pair_style quip'.")
+                print("Please install or compile a LAMMPS binary with the ML-QUIP package enabled (see https://github.com/libAtoms/lammps-quip).")
                 print("Original error message:\n", msg)
-                sys.exit(1)  # ...changed from raise...
             else:
-                sys.exit(1)  # ...changed from raise...
-
+                raise
